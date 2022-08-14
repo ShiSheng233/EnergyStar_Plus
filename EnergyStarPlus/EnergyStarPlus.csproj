@@ -45,6 +45,7 @@
 
   <ItemGroup>
     <Content Include="Strings\en-US\Resources.resw" />
+    <Content Include="Strings\zh-Hans\Resources.resw" />
   </ItemGroup>
 
   <ItemGroup>
