@@ -45,12 +45,12 @@
                 -->
                 <NavigationViewItem x:Uid="Shell_EnergyStar" helpers:NavigationHelper.NavigateTo="EnergyStarPlus.ViewModels.EnergyStarViewModel">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE734;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="Shell_Whiltelist" helpers:NavigationHelper.NavigateTo="EnergyStarPlus.ViewModels.WhiltelistViewModel">
                     <NavigationViewItem.Icon>
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;"/>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7BC;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
