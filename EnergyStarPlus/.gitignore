@@ -435,3 +435,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# Compilation waste
+
+bin/
+obj/
