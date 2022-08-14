@@ -16,6 +16,7 @@ public class PageService : IPageService
     {
         Configure<EnergyStarViewModel, EnergyStarPage>();
         Configure<WhiltelistViewModel, WhiltelistPage>();
+        Configure<SettingsViewModel, SettingsPage>();
     }
 
     public Type GetPageType(string key)

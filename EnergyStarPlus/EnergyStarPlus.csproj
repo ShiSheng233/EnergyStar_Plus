@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Strings\en-us\Resources.resw" />
+    <Content Include="Strings\en-US\Resources.resw" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +57,10 @@
 
   <ItemGroup>
     <EmbeddedResource Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Strings\zh-Hans\" />
   </ItemGroup>
   
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
