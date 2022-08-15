@@ -145,15 +145,24 @@
     <value>默认</value>
   </data>
   <data name="Settings_About.Text" xml:space="preserve">
-    <value>关于本应用程序</value>
+    <value>关于 EnergyStar Plus</value>
   </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
-    <value>TODO: Replace with your app description.</value>
+    <value>EnergyStar Plus 是一个自动管控后台程序以延长设备续航的工具。</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
     <value>隐私声明</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
     <value>https://YourPrivacyUrlGoesHere/</value>
+  </data>
+  <data name="EnergyStar_StatusText.Text" xml:space="preserve">
+    <value>运行状态</value>
+  </data>
+  <data name="EnergyStar_Note.Message" xml:space="preserve">
+    <value>你需要运行 Windows 11 并使用支持 Windows EcoQoS API 的现代 CPU, 才能使用 EnergyStar Plus</value>
+  </data>
+  <data name="EnergyStar_Note.Title" xml:space="preserve">
+    <value>注意</value>
   </data>
 </root>

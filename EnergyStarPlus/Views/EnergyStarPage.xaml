@@ -7,10 +7,27 @@
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea">
+
+        <InfoBar
+            x:Uid="EnergyStar_Note"
+            IsOpen="True"
+            IsIconVisible="True"
+            Severity="Warning"
+            IsClosable="False"/>
+
+        <Grid Margin="0,80,0,0">
+            <TextBlock>
+			<Run x:Uid="EnergyStar_StatusText" FontWeight="Bold" FontSize="14"/>
+            </TextBlock>
+            <TextBlock 
+			    Margin="0,30,0,0"
+			    x:Name="EnergyStarStatusText"/>
+        </Grid>
+
         <Grid
 		   VerticalAlignment="Bottom"
 		   HorizontalAlignment="Right"
-		   Margin="0,0,0,30">
+		   Margin="0,0,0,35">
             <ToggleButton 
 				x:Name="EnergyStarToggle"
 				Checked="ToggleButton_Checked" Unchecked="ToggleButton_Unchecked">
@@ -20,5 +37,6 @@
                 </StackPanel>
             </ToggleButton>
         </Grid>
+        
     </Grid>
 </Page>

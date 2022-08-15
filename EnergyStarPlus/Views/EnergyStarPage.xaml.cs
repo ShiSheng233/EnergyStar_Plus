@@ -29,16 +29,17 @@ public sealed partial class EnergyStarPage : Page
     {
         ViewModel = App.GetService<EnergyStarViewModel>();
         InitializeComponent();
-    }
-
-    private async void ToggleButton_Checked(object sender, RoutedEventArgs e)
-    {
 
         if (ESService != null && ESService.IsAlive)
         {
-            ShowMessageBox("Error", "EnergyStar is already running.");
+            EnergyStarToggle.IsChecked = true;
+            EnergyStarStatusText.Text = "On";
         }
-        
+        else EnergyStarStatusText.Text = "Off";
+    }
+
+    private async void ToggleButton_Checked(object sender, RoutedEventArgs e)
+    {   
         if (Environment.OSVersion.Version.Build < 22000)
         {
             ShowMessageBox("Error", "You are running on an unsupported platform.");
@@ -49,6 +50,7 @@ public sealed partial class EnergyStarPage : Page
         {
             ESService = new(new ThreadStart(EnergyStar.EnergyService.Service));
             ESService.Start();
+            EnergyStarStatusText.Text = "On";
         }
         catch (Exception ex)
         {
@@ -60,14 +62,9 @@ public sealed partial class EnergyStarPage : Page
     {
         try
         {
-            if (ESService == null || !ESService.IsAlive)
-            {
-                ShowMessageBox("Error", "EnergyStar is not running.");
-            }
-            else
-            {
-                EnergyStar.EnergyService.StopService();
-            }
+            if (ESService == null || !ESService.IsAlive) ShowMessageBox("Error", "EnergyStar is not running.");
+            else EnergyStar.EnergyService.StopService();
+            EnergyStarStatusText.Text = "Off";
         }
         catch (Exception ex)
         {
