@@ -7,6 +7,18 @@
     mc:Ignorable="d">
 
     <Grid x:Name="ContentArea">
-        
+        <Grid
+		   VerticalAlignment="Bottom"
+		   HorizontalAlignment="Right"
+		   Margin="0,0,0,30">
+            <ToggleButton 
+				x:Name="EnergyStarToggle"
+				Checked="ToggleButton_Checked" Unchecked="ToggleButton_Unchecked">
+                <StackPanel>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE868;"/>
+                    <TextBlock Text="Start"/>
+                </StackPanel>
+            </ToggleButton>
+        </Grid>
     </Grid>
 </Page>
