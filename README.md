@@ -2,6 +2,8 @@
 
 > Advanced EnergyStar -- with GUI and whitelist feature.
 
+[![CI for debug build](https://github.com/ShiSheng233/EnergyStar_Plus/actions/workflows/debug_build.yml/badge.svg?branch=master)](https://github.com/ShiSheng233/EnergyStar_Plus/actions/workflows/debug_build.yml)
+
 ## Credits
 
 ### Original EnergyStar
