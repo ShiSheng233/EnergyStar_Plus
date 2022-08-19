@@ -154,7 +154,7 @@
     <value>Privacy Statement</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-    <value>https://YourPrivacyUrlGoesHere/</value>
+    <value>https://github.com/ShiSheng233/EnergyStar_Plus</value>
   </data>
   <data name="EnergyStar_StatusText.Text" xml:space="preserve">
     <value>Status</value>
