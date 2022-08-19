@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-
 namespace EnergyStar;
 
 public class EnergyManager
@@ -50,28 +49,30 @@ public class EnergyManager
     private static uint pendingProcPid = 0;
     private static string pendingProcName = "";
 
-    private static IntPtr pThrottleOn = IntPtr.Zero;
-    private static IntPtr pThrottleOff = IntPtr.Zero;
-    private static int szControlBlock = 0;
+    private static readonly IntPtr pThrottleOn = IntPtr.Zero;
+    private static readonly IntPtr pThrottleOff = IntPtr.Zero;
+    private static readonly int szControlBlock = 0;
+
+    private static IntPtr serviceThreadId = IntPtr.Zero;
 
     static EnergyManager()
     {
-        szControlBlock = Marshal.SizeOf<Win32Api.PROCESS_POWER_THROTTLING_STATE>();
+        szControlBlock = Marshal.SizeOf<Win32Interop.PROCESS_POWER_THROTTLING_STATE>();
         pThrottleOn = Marshal.AllocHGlobal(szControlBlock);
         pThrottleOff = Marshal.AllocHGlobal(szControlBlock);
 
-        var throttleState = new Win32Api.PROCESS_POWER_THROTTLING_STATE
+        var throttleState = new Win32Interop.PROCESS_POWER_THROTTLING_STATE
         {
-            Version = Win32Api.PROCESS_POWER_THROTTLING_STATE.PROCESS_POWER_THROTTLING_CURRENT_VERSION,
-            ControlMask = Win32Api.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
-            StateMask = Win32Api.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
+            Version = Win32Interop.PROCESS_POWER_THROTTLING_STATE.PROCESS_POWER_THROTTLING_CURRENT_VERSION,
+            ControlMask = Win32Interop.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
+            StateMask = Win32Interop.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
         };
 
-        var unthrottleState = new Win32Api.PROCESS_POWER_THROTTLING_STATE
+        var unthrottleState = new Win32Interop.PROCESS_POWER_THROTTLING_STATE
         {
-            Version = Win32Api.PROCESS_POWER_THROTTLING_STATE.PROCESS_POWER_THROTTLING_CURRENT_VERSION,
-            ControlMask = Win32Api.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
-            StateMask = Win32Api.ProcessorPowerThrottlingFlags.None,
+            Version = Win32Interop.PROCESS_POWER_THROTTLING_STATE.PROCESS_POWER_THROTTLING_CURRENT_VERSION,
+            ControlMask = Win32Interop.ProcessorPowerThrottlingFlags.PROCESS_POWER_THROTTLING_EXECUTION_SPEED,
+            StateMask = Win32Interop.ProcessorPowerThrottlingFlags.None,
         };
 
         Marshal.StructureToPtr(throttleState, pThrottleOn, false);
@@ -80,17 +81,17 @@ public class EnergyManager
 
     private static void ToggleEfficiencyMode(IntPtr hProcess, bool enable)
     {
-        Win32Api.SetProcessInformation(hProcess, Win32Api.PROCESS_INFORMATION_CLASS.ProcessPowerThrottling,
+        Win32Interop.SetProcessInformation(hProcess, Win32Interop.PROCESS_INFORMATION_CLASS.ProcessPowerThrottling,
             enable ? pThrottleOn : pThrottleOff, (uint)szControlBlock);
-        Win32Api.SetPriorityClass(hProcess, enable ? Win32Api.PriorityClass.IDLE_PRIORITY_CLASS : Win32Api.PriorityClass.NORMAL_PRIORITY_CLASS);
+        Win32Interop.SetPriorityClass(hProcess, enable ? Win32Interop.PriorityClass.IDLE_PRIORITY_CLASS : Win32Interop.PriorityClass.NORMAL_PRIORITY_CLASS);
     }
 
     private static string GetProcessNameFromHandle(IntPtr hProcess)
     {
-        var capacity = 1024;
+        int capacity = 1024;
         var sb = new StringBuilder(capacity);
 
-        if (Win32Api.QueryFullProcessImageName(hProcess, 0, sb, ref capacity))
+        if (Win32Interop.QueryFullProcessImageName(hProcess, 0, sb, ref capacity))
         {
             return Path.GetFileName(sb.ToString());
         }
@@ -100,35 +101,35 @@ public class EnergyManager
 
     public static void HandleForegroundEvent(IntPtr hwnd)
     {
-        var windowThreadId = Win32Api.GetWindowThreadProcessId(hwnd, out var procId);
+        var windowThreadId = Win32Interop.GetWindowThreadProcessId(hwnd, out uint procId);
         // This is invalid, likely a process is dead, or idk
         if (windowThreadId == 0 || procId == 0) return;
 
-        var procHandle = Win32Api.OpenProcess(
-            (uint) (Win32Api.ProcessAccessFlags.QueryLimitedInformation | Win32Api.ProcessAccessFlags.SetInformation), false, procId);
+        var procHandle = Win32Interop.OpenProcess(
+            (uint)(Win32Interop.ProcessAccessFlags.QueryLimitedInformation | Win32Interop.ProcessAccessFlags.SetInformation), false, procId);
         if (procHandle == IntPtr.Zero) return;
 
         // Get the process
         var appName = GetProcessNameFromHandle(procHandle);
-        
+
         // UWP needs to be handled in a special case
         if (appName == UWPFrameHostApp)
         {
             var found = false;
-            Win32Api.EnumChildWindows(hwnd, (innerHwnd, lparam) =>
+            Win32Interop.EnumChildWindows(hwnd, (innerHwnd, lparam) =>
             {
                 if (found) return true;
-                if (Win32Api.GetWindowThreadProcessId(innerHwnd, out var innerProcId) > 0)
+                if (Win32Interop.GetWindowThreadProcessId(innerHwnd, out uint innerProcId) > 0)
                 {
                     if (procId == innerProcId) return true;
 
-                    var innerProcHandle = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.QueryLimitedInformation |
-                        Win32Api.ProcessAccessFlags.SetInformation), false, innerProcId);
+                    var innerProcHandle = Win32Interop.OpenProcess((uint)(Win32Interop.ProcessAccessFlags.QueryLimitedInformation |
+                        Win32Interop.ProcessAccessFlags.SetInformation), false, innerProcId);
                     if (innerProcHandle == IntPtr.Zero) return true;
 
                     // Found. Set flag, reinitialize handles and call it a day
                     found = true;
-                    Win32Api.CloseHandle(procHandle);
+                    Win32Interop.CloseHandle(procHandle);
                     procHandle = innerProcHandle;
                     procId = innerProcId;
                     appName = GetProcessNameFromHandle(procHandle);
@@ -150,11 +151,11 @@ public class EnergyManager
         {
             Console.WriteLine($"Throttle {pendingProcName}");
 
-            var prevProcHandle = Win32Api.OpenProcess((uint)Win32Api.ProcessAccessFlags.SetInformation, false, pendingProcPid);
+            var prevProcHandle = Win32Interop.OpenProcess((uint)Win32Interop.ProcessAccessFlags.SetInformation, false, pendingProcPid);
             if (prevProcHandle != IntPtr.Zero)
             {
                 ToggleEfficiencyMode(prevProcHandle, true);
-                Win32Api.CloseHandle(prevProcHandle);
+                Win32Interop.CloseHandle(prevProcHandle);
                 pendingProcPid = 0;
                 pendingProcName = "";
             }
@@ -166,7 +167,7 @@ public class EnergyManager
             pendingProcName = appName;
         }
 
-        Win32Api.CloseHandle(procHandle);
+        Win32Interop.CloseHandle(procHandle);
     }
 
     public static void ThrottleAllUserBackgroundProcesses()
@@ -179,9 +180,80 @@ public class EnergyManager
         {
             if (proc.Id == pendingProcPid) continue;
             if (BypassProcessList.Contains($"{proc.ProcessName}.exe".ToLowerInvariant())) continue;
-            var hProcess = Win32Api.OpenProcess((uint)Win32Api.ProcessAccessFlags.SetInformation, false, (uint) proc.Id);
+            var hProcess = Win32Interop.OpenProcess((uint)Win32Interop.ProcessAccessFlags.SetInformation, false, (uint)proc.Id);
             ToggleEfficiencyMode(hProcess, true);
-            Win32Api.CloseHandle(hProcess);
+            Win32Interop.CloseHandle(hProcess);
         }
+    }
+
+    public static void BoostAllInfluencedProcesses()
+    {
+        var runningProcesses = Process.GetProcesses();
+        var currentSessionID = Process.GetCurrentProcess().SessionId;
+
+        var sameAsThisSession = runningProcesses.Where(p => p.SessionId == currentSessionID);
+        foreach (var proc in sameAsThisSession)
+        {
+            if (proc.Id == pendingProcPid) continue;
+            if (BypassProcessList.Contains($"{proc.ProcessName}.exe".ToLowerInvariant())) continue;
+            var hProcess = Win32Interop.OpenProcess((uint)Win32Interop.ProcessAccessFlags.SetInformation, false, (uint)proc.Id);
+            ToggleEfficiencyMode(hProcess, false);
+            Win32Interop.CloseHandle(hProcess);
+        }
+    }
+
+    private static readonly CancellationTokenSource cts = new();
+
+    private static async void AutoThrottleProc()
+    {
+        Console.WriteLine("Automatic throttling service started.");
+        while (!cts.IsCancellationRequested)
+        {
+            try
+            {
+                var ThrottleTimer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+                await ThrottleTimer.WaitForNextTickAsync(cts.Token);
+                EnergyManager.ThrottleAllUserBackgroundProcesses();
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Automatic throttling service stopped.");
+                break;
+            }
+        }
+    }
+    
+    public static void MainService()
+    {
+        serviceThreadId = Win32Interop.GetCurrentThreadId();
+        Win32Interop.SubscribeToWindowEvents();
+        ThrottleAllUserBackgroundProcesses();
+
+        Thread autoThrottleThread = new (new ThreadStart(AutoThrottleProc));
+        autoThrottleThread.Start();
+
+        while (true)
+        {
+            if (Win32Interop.GetMessage(out Win32Interop.Win32WindowForegroundMessage msg, IntPtr.Zero, 0, 0))
+            {
+                if (msg.Message == Win32Interop.CUSTOM_QUIT)
+                {
+                    Console.WriteLine("Quitting...");
+                    //cts.Cancel();
+                    break;
+                }
+                Win32Interop.TranslateMessage(ref msg);
+                Win32Interop.DispatchMessage(ref msg);
+            }
+        }
+    }
+    
+    public static void StopService()
+    {
+        Win32Interop.PostThreadMessage(serviceThreadId, Win32Interop.CUSTOM_QUIT, IntPtr.Zero, IntPtr.Zero);
+        Win32Interop.UnsubscribeWindowEvents();
+        cts.Cancel();
+        BoostAllInfluencedProcesses();
+        serviceThreadId = IntPtr.Zero;
     }
 }
