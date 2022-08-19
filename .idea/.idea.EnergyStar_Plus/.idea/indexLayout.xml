@@ -2,7 +2,11 @@
 <project version="4">
   <component name="UserContentModel">
     <attachedFolders />
-    <explicitIncludes />
+    <explicitIncludes>
+      <Path>.vsconfig</Path>
+      <Path>LICENSE</Path>
+      <Path>README.md</Path>
+    </explicitIncludes>
     <explicitExcludes />
   </component>
 </project>
