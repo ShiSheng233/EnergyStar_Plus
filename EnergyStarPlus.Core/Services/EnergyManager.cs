@@ -9,7 +9,7 @@ public class EnergyManager
     public static readonly HashSet<string> BypassProcessList = new()
     {
         // Not ourselves
-        "EnergyStar.exe".ToLowerInvariant(),
+        "EnergyStarPlus.exe".ToLowerInvariant(),
         // Edge has energy awareness
         "msedge.exe",
         "WebViewHost.exe".ToLowerInvariant(),
