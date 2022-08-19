@@ -13,7 +13,6 @@
 ### UI
 
 - [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml)
-
 - [microsoft/TemplateStudio](https://github.com/microsoft/TemplateStudio)
 
 ## Made by
